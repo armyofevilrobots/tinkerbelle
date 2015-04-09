@@ -1,2 +1,6 @@
 -I/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include/ 
+-I/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/
+-I/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/mega/
 -D__AVR_ATmega1280__
+-Wno-attributes
+-DARDUINO=162
