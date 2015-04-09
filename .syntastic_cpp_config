@@ -1,0 +1,2 @@
+-I/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include/ 
+-D__AVR_ATmega1280__
