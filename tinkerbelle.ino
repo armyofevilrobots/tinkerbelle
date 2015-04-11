@@ -6,25 +6,23 @@
 #include "configuration.h"
 #include "serial.h"
 #include "cmd_buffer.h"
+#include "parser.h"
 #include "motion.h"
 #include "gcodes.h"
 #include "print.h"
 
+/*
+SUPPORTED G CODES FOR TINKERBELLE
+
+G28     [X|Y|Z] : Home axis(axes) provided
+M503            : Dump current config
 
 
-void setup_pins(){
-    pinMode(X_STEP, OUTPUT);
-    pinMode(X_DIR, OUTPUT);
-    pinMode(Y_STEP, OUTPUT);
-    pinMode(Y_DIR, OUTPUT);
-    pinMode(Z_STEP, OUTPUT);
-    pinMode(Z_DIR, OUTPUT);
-    pinMode(Y_STOP, INPUT_PULLUP);
-}
+*/
+
 
 void setup_serial(){
     Serial.begin(SERIAL_RATE);
-
 }
 
 
@@ -75,11 +73,17 @@ void get_cmd(){
         if(strstr_P(cmd_buffer, PSTR("G28"))){
           Serial.println("Got G28...");
           G28(cmd_buffer);
+        }else if(strstr(cmd_buffer, "G90")){
+            G90(cmd_buffer);
+        }else if(strstr(cmd_buffer, "G91")){
+            G91(cmd_buffer);
+        }else if(strstr(cmd_buffer, "G0")){
+            G00(cmd_buffer);
         }else if(strstr(cmd_buffer, "M503")){
-          M503(cmd_buffer);
+            M503(cmd_buffer);
         }else{
-          Serial.print("Unrecognized command: ");
-          Serial.println(cmd_buffer);
+            Serial.print("Unrecognized command: ");
+            Serial.println(cmd_buffer);
         }
         
         memset(cmd_buffer, 0, CMD_BUFFER_SIZE);

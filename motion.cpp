@@ -4,6 +4,7 @@
 
 
 long pos[] = {0,0,0};
+MotionMode motion_mode = ABSOLUTE;
 
 void step(int axispin, int dirpin, int direction){
     digitalWrite(dirpin, direction);

@@ -29,4 +29,5 @@
 #define SERIAL_RATE 115200
 #endif
 
-
+extern void setup_serial();
+extern void setup_pins();
