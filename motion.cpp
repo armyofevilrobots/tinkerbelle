@@ -11,16 +11,34 @@ void step(int axispin, int dirpin, int direction){
     digitalWrite(axispin, 1);
     delayMicroseconds(2);
     digitalWrite(axispin, 0);
-    digitalWrite(dirpin, 0);
+    //digitalWrite(dirpin, 0);
 }
 
-long move(unsigned axis, int steps){
+long accel_sleep(int axis){
+    //Delay long enough we don't drop steps. Will be smarter and stateful
+    //after we get some more work done later on.
+    delayMicroseconds(1000000/AXIS_JERK[axis]);
+}
+
+long move_axis(unsigned int axis, long int steps){
     int dir=0;
+    if (motion_mode==ABSOLUTE){
+        steps = steps - pos[axis];//it's the difference stupid!
+    }
+
     if (steps<0){
         steps=-steps;
+        dir=0;
     }else{
         dir=1;
     }
+    for(int i=0; i<steps; i++){
+        step(AXIS_STEP_PIN[axis], AXIS_DIR_PIN[axis], dir);
+        if(dir) pos[axis]++;
+        else pos[axis]--;
+        accel_sleep(axis);//This will be smarter later.
+    }
+
     
 }
 
@@ -32,14 +50,14 @@ void zero_to_back_axis(int axis, int reverse){
   Serial.println("Pulling off endstop if needed...");
   while(!digitalRead(AXIS_STOP[axis])){
     step(AXIS_STEP_PIN[axis], AXIS_DIR_PIN[axis], stepdir); 
-    delay(1);
+    delayMicroseconds(1000000/AXIS_JERK[axis]);
     if(attempts++ > 100) break; //Sanity.
   }
   //Then Zero fast...
   Serial.println("Fast move for ballpark zero...");
   while(digitalRead(AXIS_STOP[axis])){
     step(AXIS_STEP_PIN[axis], AXIS_DIR_PIN[axis], !stepdir); 
-    delay(1);
+    delayMicroseconds(1000000/AXIS_JERK[axis]);
   }
   //Then slow to get exact position...
   //Serial.println("Finally, finesse...");

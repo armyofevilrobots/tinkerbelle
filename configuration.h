@@ -1,5 +1,10 @@
-#if (ARDUINO >= 100)
+#include <InkShieldMega.h>
+#ifndef ARDUINO
+  #define ARDUINO = 0
+#elif (ARDUINO >= 100)
   #include "Arduino.h"
+#elif (ARDUINO == 0)
+  //Perhaps a dummy include?
 #else
   #include "WProgram.h"
 #endif
@@ -24,9 +29,19 @@
 #define Z_AXIS 2
 #define MAX_COMMAND_SIZE 80
 #define Y_STEPS_MM (200.0*8.0)/(16.0*5.08)
+//Jerks are defined in units/s
+#define X_JERK 100
+#define Y_JERK 1000
+#define Z_JERK 100
+//Acceleration is reduction in delay between steps
 // Serial config
 #define SERIAL_PORT 0
-#define SERIAL_RATE 115200
+#define SERIAL_RATE 57600
+
+//Inkshield stuffs
+//#define INKSHIELD_CLASS InkShieldA0A3
+#define INKSHIELD_PIN 2
+extern InkShieldA0A3 inkshield;
 #endif
 
 extern void setup_serial();

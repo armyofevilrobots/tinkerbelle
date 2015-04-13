@@ -1,4 +1,8 @@
+#include <string.h>
+#include <stdlib.h>
+#include "stdio.h"
 #include "parser.h"
+#include "gcodes.h"
 
 //For testing.
 #ifndef ARDUINO
@@ -6,6 +10,22 @@
 #include <string.h>
 #include <stdlib.h>
 #endif
+
+
+
+bool is_valid_gcode(char buf[]){
+    char *tmp=buf;
+    //Invalid characters
+    while(*tmp){
+        //if(*tmp>=65 && *tmp<=90)
+            //*tmp += 32;
+        if(!strchr(" -GMXYZES1234567890", *tmp)){
+            return false;
+        }
+        tmp++;
+    }
+    return true;
+}
 
 char gmcode(char buf[]){
     //Is this a G or M code?
@@ -38,3 +58,15 @@ void get_coords(char *buf, char *axis, long *coords, bool *valid){
     }
 }
 
+Gcode get_cmd(char *buf, char *axis, long *coords, bool *valid){
+    char * tmp = buf;
+    Gcode gcode={'E', 0};
+    if(!is_valid_gcode(buf)) return gcode; // error
+    gcode.cmdchar = gmcode(tmp);
+    if(!gcode.cmdchar) return gcode; //error!
+    tmp++;
+    gcode.cmdcode = atoi(tmp);
+    get_coords(buf, axis, coords, valid);
+
+    return gcode;
+}

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "parser.h"
+#include "gcodes.h"
 
 
 /*
@@ -42,7 +43,7 @@ int main(int argc, char *argv[]){
     char *cmd[3];//={,, };
     cmd[0]="G28XYZ"; 
     cmd[1]="G01X25Y13"; 
-    cmd[2]="G0X0Y25"; 
+    cmd[2]="BASDASFCd"; 
     char coords[]="XYZ";
     long xyz[]={0,0,0};
     bool xyzvalid[]={0,0,0};
@@ -55,17 +56,26 @@ int main(int argc, char *argv[]){
     for(int j=0;j<3;j++){
         tmp=cmd[j];
         printf("Scanning command %s\n", tmp);
-        if(gmcode(tmp)=='G'){
-            //printf("Found code G in %s\n", tmp);
-            gcode=atoi(tmp);
-            printf("GCode is: G%d\n", gcode);
-            get_coords(tmp, "XYZ", xyz, xyzvalid);
-            for(int i=0;i<3;i++){
-                if(xyzvalid[i]) printf("%c : %ld\n", coords[i], xyz[i]);
-            }
+        //if(gmcode(tmp)=='G'){
+            ////printf("Found code G in %s\n", tmp);
+            //gcode=atoi(tmp);
+            //printf("GCode is: G%d\n", gcode);
+            //get_coords(tmp, "XYZ", xyz, xyzvalid);
+            //for(int i=0;i<3;i++){
+                //if(xyzvalid[i]) printf("%c : %ld\n", coords[i], xyz[i]);
+            //}
+        //}
 
+
+        Gcode mycmd = get_cmd(tmp, "XYZ", xyz, xyzvalid);
+        printf("Got cmd: %c : %d\n", mycmd.cmdchar, mycmd.cmdcode);
+        if(mycmd.cmdchar==0){
+            printf("Invalid CMDCODE: %s\n", cmd[j]);
+            continue;
         }
-
+        for(int i=0;i<3;i++){
+            if(xyzvalid[i]) printf("%c : %ld\n", coords[i], xyz[i]);
+        }
 
     }
 

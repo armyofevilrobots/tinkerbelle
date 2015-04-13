@@ -1,3 +1,5 @@
+#include <InkShieldMega.h>
+
 /*
  * This is the minimalist test firmware for the tinkerbelle
  * powder printer.
@@ -10,11 +12,22 @@
 #include "motion.h"
 #include "gcodes.h"
 #include "print.h"
+#ifdef ARDUINO
+#include <avr/wdt.h>
+#endif
+
+char * read_cmd();
+bool dispatch_cmd(char *);
+char cmd_buffer[CMD_BUFFER_SIZE];
+//extern int buflen;
+
+InkShieldA0A3 inkshield(INKSHIELD_PIN);
+
 
 /*
-SUPPORTED G CODES FOR TINKERBELLE
+   SUPPORTED G CODES FOR TINKERBELLE
 
-G28     [X|Y|Z] : Home axis(axes) provided
+   G28     [X|Y|Z] : Home axis(axes) provided
 M503            : Dump current config
 
 
@@ -28,10 +41,10 @@ void setup_serial(){
 
 void setup() {
     // put your setup code here, to run once:
+    wdt_disable();
     setup_serial();
     setup_pins();
-    Serial.println("Booting Tinkerbelle.");
-   
+    //Serial.println("Booting Tinkerbelle.");
 }
 
 
@@ -39,62 +52,86 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
-    
-    /*
-    while(1){
-      if(digitalRead(Y_STOP)){
-        Serial.println("YSTOP");
-      }else{
-        Serial.println("!YSTOP");
-      }
-      delay(512);
-    }
-    */
-    while(1){
-      get_cmd();
-    }
-}
 
-void get_cmd(){
-    char serial_char;    
-    
-    while(Serial.available() > 0  && buflen < CMD_BUFFER_SIZE) {
-      serial_char = Serial.read();
-      
-      if(serial_char == '\n' ||
-         serial_char == '\r' ||
-         buflen >= (CMD_BUFFER_SIZE - 1) )
-      {
-        cmd_buffer[buflen++] = 0;
-        Serial.print(cmd_buffer);
-        Serial.println(" : OK");
-        if(!buflen) return; //Don't try to parse blank lines
-        
-        if(strstr_P(cmd_buffer, PSTR("G28"))){
-          Serial.println("Got G28...");
-          G28(cmd_buffer);
-        }else if(strstr(cmd_buffer, "G90")){
-            G90(cmd_buffer);
-        }else if(strstr(cmd_buffer, "G91")){
-            G91(cmd_buffer);
-        }else if(strstr(cmd_buffer, "G0")){
-            G00(cmd_buffer);
-        }else if(strstr(cmd_buffer, "M503")){
-            M503(cmd_buffer);
-        }else{
-            Serial.print("Unrecognized command: ");
-            Serial.println(cmd_buffer);
+    while(1){
+        Serial.println("FOO");
+        //delay(200);
+        if (dispatch_cmd(read_cmd())){
+            Serial.print(cmd_buffer);
+            Serial.println(" : OK");
         }
-        
-        memset(cmd_buffer, 0, CMD_BUFFER_SIZE);
-        buflen = 0;
-      }
-      //I guess we don't have a full cmd yet.
-      cmd_buffer[buflen++] = serial_char;
-       
     }
-    return;
-
-       
-    //}//while
 }
+
+bool shutdown(){
+    Serial.println("REBOOTING!");
+    wdt_enable(WDTO_15MS);
+    for(;;){}
+    return true;
+}
+
+
+bool dispatch_cmd(char *cmd){
+    if(!cmd) return true; //Blank string.
+    static char axes[]="XYZ";
+    long xyz[]={0,0,0};
+    bool xyzvalid[]={false, false, false};
+    Gcode gcode = get_cmd(cmd, axes, xyz, xyzvalid);
+    if(gcode.cmdchar=='G'){
+        switch(gcode.cmdcode){
+            case 0:
+            case 1:
+                return G00(xyz, xyzvalid);
+            case 28:
+                return G28(xyz, xyzvalid);
+            case 90:
+                return G90(NULL, NULL);
+            case 91:
+                return G91(NULL, NULL);
+            case 92:
+                return G92(xyz, xyzvalid);
+            default:
+                return false;
+        }//SwitchG
+    }
+    else if(gcode.cmdchar=='M'){
+        switch(gcode.cmdcode){
+            case 0:
+                return shutdown();
+            case 47:
+                return M47(NULL, NULL);
+            case 114:
+                return M114(NULL, NULL);
+            case 503:
+                return M503(xyz, xyzvalid);
+
+
+            default:
+                return false;
+        }//switchM
+    }
+    //ERROR!
+    return false;
+}
+
+//char * read_cmd(){
+    //char serial_char;    
+    //buflen = 0;
+    //memset(cmd_buffer, 0, CMD_BUFFER_SIZE);
+    //while(true)
+        //while(Serial.available() > 0  && buflen < CMD_BUFFER_SIZE) {
+            //serial_char = Serial.read();
+            //if(serial_char == '\n' ||
+                    //serial_char == '\r' ||
+                    //buflen >= (CMD_BUFFER_SIZE - 1) )
+            //{
+                //cmd_buffer[buflen++] = 0;
+                //if(!buflen) return 0; //Don't try to parse blank lines
+                //return cmd_buffer;
+            //}else{
+                //cmd_buffer[buflen++] = serial_char;
+            //}//EOL/CHARREAD
+        //}//while serial
+//}
+
+
