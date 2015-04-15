@@ -54,7 +54,7 @@ void loop() {
     // put your main code here, to run repeatedly:
 
     while(1){
-        //delay(200);
+        /*delay(200);*/
         if (dispatch_cmd(read_cmd())){
             Serial.print(cmd_buffer);
             Serial.println(" : OK");
@@ -112,25 +112,4 @@ bool dispatch_cmd(char *cmd){
     //ERROR!
     return false;
 }
-
-//char * read_cmd(){
-    //char serial_char;    
-    //buflen = 0;
-    //memset(cmd_buffer, 0, CMD_BUFFER_SIZE);
-    //while(true)
-        //while(Serial.available() > 0  && buflen < CMD_BUFFER_SIZE) {
-            //serial_char = Serial.read();
-            //if(serial_char == '\n' ||
-                    //serial_char == '\r' ||
-                    //buflen >= (CMD_BUFFER_SIZE - 1) )
-            //{
-                //cmd_buffer[buflen++] = 0;
-                //if(!buflen) return 0; //Don't try to parse blank lines
-                //return cmd_buffer;
-            //}else{
-                //cmd_buffer[buflen++] = serial_char;
-            //}//EOL/CHARREAD
-        //}//while serial
-//}
-
 

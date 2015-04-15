@@ -45,10 +45,6 @@ bool G92(long coords[], bool valid[]){
     }//loop
 }
 
-bool G90(long *coords, bool *valid){
-    motion_mode=ABSOLUTE;
-    return true;
-}
 
 unsigned int parse_char_datax(char * data){
     //Parse a single column, then return the new column (12 bits) uint_16t.
