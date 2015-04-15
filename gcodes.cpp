@@ -27,6 +27,11 @@ bool G28(long *coords, bool valid[3]){
     return true;
 }
 
+bool G90(long *coords, bool *valid){
+    motion_mode=ABSOLUTE;
+    return true;
+}
+
 bool G91(long *coords, bool *valid){
     motion_mode=RELATIVE;
     return true;

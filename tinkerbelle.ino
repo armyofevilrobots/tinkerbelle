@@ -54,7 +54,6 @@ void loop() {
     // put your main code here, to run repeatedly:
 
     while(1){
-        Serial.println("FOO");
         //delay(200);
         if (dispatch_cmd(read_cmd())){
             Serial.print(cmd_buffer);

@@ -30,7 +30,7 @@
 #define MAX_COMMAND_SIZE 80
 #define Y_STEPS_MM (200.0*8.0)/(16.0*5.08)
 //Jerks are defined in units/s
-#define X_JERK 100
+#define X_JERK 1000
 #define Y_JERK 1000
 #define Z_JERK 100
 //Acceleration is reduction in delay between steps
